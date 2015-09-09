@@ -6,16 +6,16 @@ using UnityEngine;
 
 namespace Assets.PlayerControl
 {
+    [RequireComponent(typeof(Camera))]
     class CameraBoom : MonoBehaviour
     {
         private Transform _boomOrigin;
-        private float _length;
 
-        public void Initialize(Camera camera, Transform boomOrigin, float length = 10)
+        void Start()
         {
-            _boomOrigin = boomOrigin;
-            Length = length;
-            Camera = camera;
+            Camera = GetComponent<Camera>();
+            _boomOrigin = transform.parent.transform;
+            SetBoomToEuler(2 * Vector3.back + Vector3.up);
         }
 
         public Vector3 Get2dForward()
@@ -29,14 +29,7 @@ namespace Assets.PlayerControl
             Camera.transform.position = _boomOrigin.position + (eulerDirection.normalized * Length);
         }
 
-        public float Length
-        {
-            get { return _length; }
-            set
-            {
-                _length = value;
-            }
-        }
+        public float Length;
 
         void Update()
         {

@@ -8,25 +8,23 @@ namespace Assets.PlayerControl
 {
     class MouseControl : MonoBehaviour
     {
-        private CameraBoom _boom;
+        public float MouseSensitivity;
+
+        public CameraBoom Boom;
         void Start()
         {
-            _boom = GetComponent<CameraBoom>();
-            _boom.Initialize(Camera.main, transform);
-            _boom.SetBoomToEuler(-transform.forward + Vector3.up * .5f);
+            Boom.SetBoomToEuler(-transform.forward + Vector3.up * .5f);
         }
-
-
         void Update()
         {
             if (Input.GetMouseButton(0) || Input.GetMouseButton(1))
             {
-                _boom.RotateHorizontal(Input.GetAxis("Mouse X"));
-                _boom.RotateVertical(-Input.GetAxis("Mouse Y"));
+                Boom.RotateHorizontal(Input.GetAxis("Mouse X") * MouseSensitivity);
+                Boom.RotateVertical(-Input.GetAxis("Mouse Y") * MouseSensitivity);
             }
             if (Input.GetMouseButton(1))
             {
-                transform.rotation = Quaternion.LookRotation(_boom.Get2dForward(), Vector3.up);
+                transform.rotation = Quaternion.LookRotation(Boom.Get2dForward(), Vector3.up);
             }
         }
 
