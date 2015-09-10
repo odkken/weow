@@ -69,7 +69,9 @@ namespace Assets
                 }
 
             }
-            rigidBody.velocity = new Vector3(inputVel.x, rigidBody.velocity.y, inputVel.z);
+
+            if (isOnGround || inputVel.sqrMagnitude > .05)
+                rigidBody.velocity = new Vector3(inputVel.x, rigidBody.velocity.y, inputVel.z);
 
             //var translational = new Vector3(rigidBody.velocity.x, 0, rigidBody.velocity.z);
             //if (translational.magnitude > Speed)

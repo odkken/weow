@@ -13,10 +13,11 @@ namespace Assets.PlayerControl
 
         void Awake()
         {
+            Application.targetFrameRate = 120;
             Camera = GetComponent<Camera>();
             _boomOrigin = transform.parent.transform;
-            SetBoomToEuler(2 * Vector3.back + Vector3.up);
-            Camera.transform.LookAt(_boomOrigin, Vector3.up);
+            SetBoomToEuler(3 * Vector3.back + Vector3.up);
+            Camera.transform.LookAt(GetPivotPoint(), Vector3.up);
         }
 
         public Vector3 Get2dForward()
@@ -27,8 +28,15 @@ namespace Assets.PlayerControl
 
         public void SetBoomToEuler(Vector3 eulerDirection)
         {
-            Camera.transform.position = _boomOrigin.position + (eulerDirection.normalized * Length);
+            Camera.transform.position = GetPivotPoint() + (eulerDirection.normalized * Length);
         }
+
+        private Vector3 GetPivotPoint()
+        {
+            return _boomOrigin.position + new Vector3(0, VerticalOffset, 0);
+        }
+
+        public float VerticalOffset;
 
         public float Length;
 
@@ -40,7 +48,7 @@ namespace Assets.PlayerControl
 
         public void RotateHorizontal(float angle)
         {
-            Camera.transform.RotateAround(_boomOrigin.position, Vector3.up, angle);
+            Camera.transform.RotateAround(GetPivotPoint(), Vector3.up, angle);
         }
 
         public void RotateVertical(float angle)
@@ -49,13 +57,11 @@ namespace Assets.PlayerControl
             var newAngle = currentHorizontalAngle + angle;
             if (newAngle > 89.5 && newAngle < 120)
                 angle -= (newAngle - 90);
-            if (newAngle < 270 && newAngle > 230)
+            if (newAngle < 270.5 && newAngle > 230)
             {
-                Debug.Log("old angle: " + angle);
                 angle -= (newAngle - 270);
-                Debug.Log("new angle: " + angle);
             }
-            Camera.transform.RotateAround(_boomOrigin.position, Camera.transform.right, angle);
+            Camera.transform.RotateAround(GetPivotPoint(), Camera.transform.right, angle);
         }
     }
 }
