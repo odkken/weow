@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace Assets
 {
@@ -28,19 +30,51 @@ namespace Assets
 
         private bool isOnGround;
 
+        private Dictionary<Collider, List<ContactPoint>> currentOverlappingColliders = new Dictionary<Collider, List<ContactPoint>>();
+
+        void OnCollisionEnter(Collision collision)
+        {
+            currentOverlappingColliders.Add(collision.collider, collision.contacts.ToList());
+        }
+
+        void OnCollisionStay(Collision collision)
+        {
+            currentOverlappingColliders[collision.collider] = new List<ContactPoint>(collision.contacts);
+        }
+
+        void OnCollisionExit(Collision collision)
+        {
+            currentOverlappingColliders.Remove(collision.collider);
+        }
+
+
         // Update is called once per frame
         void Update()
         {
             isOnGround = Physics.Raycast(new Ray(transform.position, Vector3.down), 1.01f);
 
             var inputVel = GetInputVector().normalized * (isOnGround ? Accel : AirAccel);
-            //if (isOnGround && inputVel.sqrMagnitude > .1f)
-            rigidBody.AddForce(inputVel);
+            //Debug.Log(inputVel);
+            foreach (var currentOverlappingCollider in currentOverlappingColliders)
+            {
+                foreach (var contactPoint in currentOverlappingCollider.Value)
+                {
+                    var playerDot = Vector3.Dot(contactPoint.point - transform.position, contactPoint.normal);
+                    var dot = Vector3.Dot(inputVel, contactPoint.normal);
 
-            var translational = new Vector3(rigidBody.velocity.x, 0, rigidBody.velocity.z);
-            if (translational.magnitude > Speed)
-                translational = translational.normalized * Speed;
-            rigidBody.velocity = new Vector3(translational.x, rigidBody.velocity.y, translational.z);
+                    if (playerDot < 0 && dot > 0)
+                        continue;
+
+                    inputVel -= contactPoint.normal * (dot);
+                }
+
+            }
+            rigidBody.velocity = new Vector3(inputVel.x, rigidBody.velocity.y, inputVel.z);
+
+            //var translational = new Vector3(rigidBody.velocity.x, 0, rigidBody.velocity.z);
+            //if (translational.magnitude > Speed)
+            //    translational = translational.normalized * Speed;
+            //rigidBody.velocity = new Vector3(translational.x, rigidBody.velocity.y, translational.z);
 
             if (isOnGround && Input.GetKeyDown(KeyCode.Space))
                 Jump();
