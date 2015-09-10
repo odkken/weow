@@ -11,11 +11,12 @@ namespace Assets.PlayerControl
     {
         private Transform _boomOrigin;
 
-        void Start()
+        void Awake()
         {
             Camera = GetComponent<Camera>();
             _boomOrigin = transform.parent.transform;
             SetBoomToEuler(2 * Vector3.back + Vector3.up);
+            Camera.transform.LookAt(_boomOrigin, Vector3.up);
         }
 
         public Vector3 Get2dForward()
@@ -33,21 +34,28 @@ namespace Assets.PlayerControl
 
         void Update()
         {
-            if (Camera != null && Camera.transform != null)
-                Camera.transform.position = _boomOrigin.position + (Length * (Camera.transform.position - _boomOrigin.position).normalized);
+            //Debug.Log(Camera.transform.rotation.eulerAngles);
         }
         public Camera Camera { get; private set; }
 
         public void RotateHorizontal(float angle)
         {
             Camera.transform.RotateAround(_boomOrigin.position, Vector3.up, angle);
-            Camera.transform.LookAt(_boomOrigin, Vector3.up);
         }
 
         public void RotateVertical(float angle)
         {
+            var currentHorizontalAngle = Camera.transform.rotation.eulerAngles.x;
+            var newAngle = currentHorizontalAngle + angle;
+            if (newAngle > 89.5 && newAngle < 120)
+                angle -= (newAngle - 90);
+            if (newAngle < 270 && newAngle > 230)
+            {
+                Debug.Log("old angle: " + angle);
+                angle -= (newAngle - 270);
+                Debug.Log("new angle: " + angle);
+            }
             Camera.transform.RotateAround(_boomOrigin.position, Camera.transform.right, angle);
-            Camera.transform.LookAt(_boomOrigin, Vector3.up);
         }
     }
 }
